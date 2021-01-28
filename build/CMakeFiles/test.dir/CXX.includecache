@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/syr/桌面/serverDev/tests/test.cpp
+iostream
+-
+sylar/log.h
+/home/syr/桌面/serverDev/tests/sylar/log.h
+

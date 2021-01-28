@@ -1,0 +1,4 @@
+/home/syr/桌面/serverDev/build/CMakeFiles/edit_cache.dir
+/home/syr/桌面/serverDev/build/CMakeFiles/rebuild_cache.dir
+/home/syr/桌面/serverDev/build/CMakeFiles/test.dir
+/home/syr/桌面/serverDev/build/CMakeFiles/sylar.dir

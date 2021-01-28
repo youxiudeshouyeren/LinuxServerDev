@@ -7,6 +7,7 @@
 #include<memory>
 #include<list>
 #include<fstream>
+
 #include<vector>
 
 namespace sylar{
@@ -19,7 +20,7 @@ namespace sylar{
         public:
 
         typedef std::shared_ptr<LogEvent> ptr;
-        LogEvent();
+        LogEvent(const char* file,int32_t m_line,uint32_t elapse,uint32_t thread_id,uint32_t fiber_id,uint64_t time);
 
         const char* getFile()const{return m_file;}
 
@@ -82,7 +83,7 @@ class LogLevel{
         public:
             class FormatItem{
                 public:
-                FormatItem(const std::string&fmt=""){}
+              
                 typedef std::shared_ptr<FormatItem> ptr;
                 virtual ~FormatItem(){}
                 virtual void format(std::ostream&os,std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event)=0;
@@ -118,7 +119,7 @@ class LogLevel{
     };
 
     //日志输出器
-    class Logger{
+    class Logger :public std::enable_shared_from_this<Logger>{
 
         public:
 
@@ -149,6 +150,8 @@ class LogLevel{
 
         std::list<LogAppender::ptr> m_appenders; //appenders集合
 
+        LogFormatter::ptr m_formatter;
+
     };
 
     
@@ -158,7 +161,7 @@ class StdoutLogAppender : public LogAppender{
     public:
 
         typedef std::shared_ptr<StdoutLogAppender> ptr;
-         void log(std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override;
+         void log(Logger::ptr logger,LogLevel::Level level,LogEvent::ptr event) override;
 
     private:
 
@@ -171,7 +174,7 @@ class FileLogAppender : public LogAppender{
 
     typedef std::shared_ptr<FileLogAppender> ptr;
     FileLogAppender(const std::string& filename);
-     void log(std::shared_ptr<Logger> logger, LogLevel::Level level,LogEvent::ptr event) override;
+     void log(Logger::ptr  logger, LogLevel::Level level,LogEvent::ptr event) override;
 
 
     //重新打开文件，文件打开成功返回true

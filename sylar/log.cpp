@@ -3,8 +3,21 @@
 #include<sstream>
 #include<map>
 #include "log.h"
+#include<functional>
 namespace sylar{
 
+
+
+
+  LogEvent::LogEvent(const char* file,int32_t m_line,uint32_t elapse,uint32_t thread_id,uint32_t fiber_id,uint64_t time)
+  :m_file(file),
+  m_line(m_line),
+  m_elapse(elapse),
+  m_threadId(thread_id),
+  m_fiberId(fiber_id),
+  m_time(time){
+
+   }
 
 /*----------------------------------------------------------------
 *
@@ -33,9 +46,9 @@ const char* LogLevel::ToString(LogLevel::Level level){
 
 
 
-class MessageFormatter : public LogFormatter::FormatItem{
+class MessageFormatItem: public LogFormatter::FormatItem{
       public:
-
+        MessageFormatItem(const std::string& str=""){}
         void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event)override{
             os<<event->getContent();
         }
@@ -48,7 +61,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
   class LevelFormatItem: public LogFormatter::FormatItem{
 
       public:
-      
+       LevelFormatItem(const std::string& str=""){}
         void format(std::ostream& os,std::shared_ptr<Logger>logger, LogLevel::Level level,LogEvent::ptr event)override{
             os<<LogLevel::ToString(level);
         }
@@ -57,7 +70,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
   class ElaspseFormatItem: public LogFormatter::FormatItem{
 
       public:
-
+       ElaspseFormatItem(const std::string& str=""){}
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<event->getContent();
          }
@@ -66,7 +79,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
   class NameFormatItem: public LogFormatter::FormatItem{
 
       public:
-
+         NameFormatItem(const std::string& str=""){}
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<logger->getName();
          }
@@ -75,7 +88,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
 //线程号
   class ThreadIdFormatItem: public LogFormatter::FormatItem{
        public:
-
+         ThreadIdFormatItem(const std::string& str=""){}
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<event->getThreadId();
          }
@@ -84,7 +97,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
 //协程号
    class FiberIdFormatItem:public LogFormatter::FormatItem{
        public:
-
+         FiberIdFormatItem(const std::string& str=""){}
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<event->getFiberId();
          }
@@ -107,7 +120,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
 //文件名
    class FilenameFormatItem:public LogFormatter::FormatItem{
        public:
-
+         FilenameFormatItem(const std::string& str=""){}
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<event->getFile();
          }
@@ -116,7 +129,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
 //行号
    class LineFormatItem:public LogFormatter::FormatItem{
        public:
-
+        LineFormatItem(const std::string& str=""){}
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<event->getLine();
          }
@@ -125,7 +138,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
   //换行
    class NewLineFormatItem:public LogFormatter::FormatItem{
        public:
-
+         NewLineFormatItem(const std::string& str=""){}
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<std::endl;
          }
@@ -135,7 +148,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
 //
    class StringFormatItem:public LogFormatter::FormatItem{
        public:
-       StringFormatItem(const std::string& str):FormatItem(str),m_string(str) {}
+       StringFormatItem(const std::string& str):m_string(str) {}
 
          void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event) override{
              os<<m_string;
@@ -147,12 +160,16 @@ class MessageFormatter : public LogFormatter::FormatItem{
 /*----------------------------------------------------------------
 *
 */
-    Logger::Logger(const std::string& name="root"):m_name(name){
+    Logger::Logger(const std::string& name):m_name(name),m_level(LogLevel::Level::DEBUG){
+        m_formatter.reset(new LogFormatter("%d [%p] %f %l %m %n"));
 
     }
 
     void Logger::addAppender(LogAppender::ptr appender){
-        this->m_appenders.push_back(appender);
+       if(!appender->getFormatter()){
+           appender->setFormatter(m_formatter); //如果appender没有formatter 就把自己的给他
+       }
+       m_appenders.push_back(appender);
 
     }
 
@@ -167,8 +184,9 @@ class MessageFormatter : public LogFormatter::FormatItem{
 
      void Logger::log( LogLevel::Level level,const LogEvent::ptr event){
          if(level>=m_level){
+             auto self=shared_from_this();
              for(auto& i:m_appenders){
-
+                 i->log(self,level,event);
              }
          }
      }
@@ -253,8 +271,8 @@ class MessageFormatter : public LogFormatter::FormatItem{
           }
 
           size_t n=i+1;
-          int fmt_status;
-          size_t fmt_begin;
+          int fmt_status=0;
+          size_t fmt_begin=0;
           std::string fmt;
           std::string str;
 
@@ -286,7 +304,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
           }
           if(fmt_status==0){
               if(!nstr.empty()){
-                  vec.push_back(std::make_tuple(nstr,"",0));
+                  vec.push_back(std::make_tuple(nstr,std::string(),0));
               }
               
               str=m_pattern.substr(i+1,n-i-1);
@@ -302,7 +320,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
          
       }
       if(!nstr.empty()){
-          vec.push_back(std::make_tuple(nstr,"",0));
+          vec.push_back(std::make_tuple(nstr,std::string(),0));
       }
 
     static std::map<std::string,std::function<FormatItem::ptr(const std::string& str)> >s_format_items={
@@ -314,7 +332,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
 
         XX(m,MessageFormatItem),
         XX(p,LevelFormatItem),
-        XX(r,ElapseFormatItem),
+        XX(r,ElaspseFormatItem),
         XX(c,NameFormatItem),
         XX(t,ThreadIdFormatItem),
         XX(d,DateTimeFormatItem),
