@@ -1,8 +1,8 @@
-#include "log.h"
+
 #include<iostream>
 #include<sstream>
 #include<map>
-
+#include "log.h"
 namespace sylar{
 
 
@@ -311,6 +311,7 @@ class MessageFormatter : public LogFormatter::FormatItem{
         {#str,[](const std::string& fmt){return FormatItem::ptr(new C(fmt));}}
 
 
+
         XX(m,MessageFormatItem),
         XX(p,LevelFormatItem),
         XX(r,ElapseFormatItem),
@@ -337,9 +338,24 @@ class MessageFormatter : public LogFormatter::FormatItem{
       */
 
      for(auto& i:vec){
-         if(std::get<)
+         if(std::get<2>(i) ==0){
+             m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i))));
+         }
+         else
+         {
+             auto it=s_format_items.find(std::get<0>(i));
+             if(it==s_format_items.end()){
+                 m_items.push_back(FormatItem::ptr(new StringFormatItem("<<error_format %"+std::get<0>(i)+">>")));
+             }else{
+                 m_items.push_back(it->second(std::get<1>(i)));
+             }
+         }
+
+         std::cout<<std::get<0>(i)<<" - "<<std::get<1>(i)<<" - "<<std::get<2>(i)<<std::endl;
+         }
      }
-  }
+  
+  
 
   std::string LogFormatter::format(std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event){
       std::stringstream ss;
