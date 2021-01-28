@@ -7,7 +7,7 @@
 #include<memory>
 #include<list>
 #include<fstream>
-
+#include<sstream>
 #include<vector>
 
 namespace sylar{
@@ -34,7 +34,9 @@ namespace sylar{
 
         uint64_t getTime() const {return m_time;}
 
-        const std::string& getContent() const{return m_content;}
+        std::string getContent() const{return m_ss.str();}
+
+        std::stringstream& getSS() {return m_ss;}
 
 
         private:
@@ -43,7 +45,7 @@ namespace sylar{
         uint32_t m_elapse=0; //程序启动开始到现在的毫秒数
         uint32_t m_threadId=0; //线程ID
         uint32_t m_fiberId=0;//协程ID
-        std::string m_content; //
+        std::stringstream m_ss; //
         uint64_t m_time;//时间戳
 
 
