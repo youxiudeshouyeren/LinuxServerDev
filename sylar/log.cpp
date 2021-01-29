@@ -4,6 +4,8 @@
 #include <map>
 #include "log.h"
 #include <functional>
+#include <time.h>
+#include <string.h>
 namespace sylar
 {
 
@@ -70,6 +72,7 @@ namespace sylar
         }
     };
 
+//消息主体
     class ElaspseFormatItem : public LogFormatter::FormatItem
     {
 
@@ -118,11 +121,21 @@ namespace sylar
     class DateTimeFormatItem : public LogFormatter::FormatItem
     {
     public:
-        DateTimeFormatItem(const std::string &format = "%Y:%m:%d %H:%M:%S") : m_format(format) {}
+        DateTimeFormatItem(const std::string &format = "%Y-%m-%d %H:%M:%S") : m_format(format) {
+            if(m_format.empty()){
+                m_format="%Y-%m-%d %H:%M:%S";
+            }
+
+        }
 
         void format(std::ostream &os, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) override
         {
-            os << event->getTime();
+            struct tm tm;
+            time_t time=event->getTime();
+            localtime_r (&time, &tm);
+            char buf[64];
+            strftime(buf,sizeof(buf), m_format.c_str(),&tm);
+            os << buf;
         }
 
     private:
@@ -181,7 +194,7 @@ namespace sylar
 */
     Logger::Logger(const std::string &name) : m_name(name), m_level(LogLevel::Level::DEBUG)
     {
-        m_formatter.reset(new LogFormatter("%d%t[p]%T[%c]%f:%l%m%n"));
+        m_formatter.reset(new LogFormatter("%d  [%p] <%f:%l>  %m  %n"));
     }
 
     void Logger::addAppender(LogAppender::ptr appender)
@@ -442,7 +455,7 @@ namespace sylar
                 }
             }
 
-           std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
+        //   std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
  
         }
        // std::cout << m_items.size() << std::endl;

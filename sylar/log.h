@@ -115,7 +115,7 @@ class LogLevel{
 
         protected:
 
-            LogLevel::Level m_level;
+            LogLevel::Level m_level=LogLevel::DEBUG; //初始化一个等级
             LogFormatter::ptr m_formatter;
 
     };

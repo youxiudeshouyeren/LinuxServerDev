@@ -8,11 +8,11 @@ int main(int argc, char **argv){
 
     sylar::LogEvent::ptr event(new sylar::LogEvent(__FILE__, __LINE__,0,1,2,time(0)));
 
-    event->getSS()<<"hhhgggggggh"<<std::endl;
+    event->getSS()<<"v1.0 日志模块. May the force be with you!"<<std::endl;
 
     logger->log(sylar::LogLevel::DEBUG, event);
 
-    std::cout<<"hello sylar log"<<std::endl;
+    
 
     return 0;
 }
