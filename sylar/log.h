@@ -9,10 +9,55 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include<map>
+#include"singleton.h"
+#include<stdarg.h>
+
+
+#define SYLAR_LOG_LEVEL(logger,level)\
+    if(logger->getLevel()<=level)\
+        sylar::LogEventWrap(sylar::LogEvent::ptr(new sylar::LogEvent(logger,level,__FILE__,__LINE__,0,sylar::GetThreadId(),sylar::GetFiberId(),time(0)))).getSS()\
+    
+
+
+#define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger,sylar::LogLevel::DEBUG)
+#define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger,sylar::LogLevel::INFO)
+#define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger,sylar::LogLevel::WARN)
+#define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger,sylar::LogLevel::ERROR)
+#define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger,sylar::LogLevel::FATAL)
+
+#define SYLAR_LOG_FMT_LEVEL(logger,level,fmt,...)\
+    if(logger->getLevel()<=level)\
+        sylar::LogEventWrap(sylar::LogEvent::ptr(new sylar::LogEvent(logger,level,__FILE__, __LINE__,0,sylar::GetThreadId(),sylar::GetFiberId(),time(0)))).getEvent()->format(fmt,__VA_ARGS__)
+
+
+
+#define SYLAR_LOG_FMT_DEBUG(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::DEBUG,fmt,__VA_ARGS__)
+#define SYLAR_LOG_FMT_INFO(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::INFO,fmt,__VA_ARGS__)
+#define SYLAR_LOG_FMT_WARN(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::WARN,fmt,__VA_ARGS__)
+#define SYLAR_LOG_FMT_ERROR(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::ERROR,fmt,__VA_ARGS__)
+#define SYLAR_LOG_FMT_FATAL(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::FATAL,fmt,__VA_ARGS__)
+
 
 namespace sylar{
 
     class Logger;
+
+    //日志级别
+class LogLevel{
+    public:
+        enum Level{
+                UNKNOWN=0,
+                DEBUG=1,
+                INFO=2,
+                WARN=3,
+                ERROR=4,
+                FATAL=5
+            };//日志级别
+            
+            
+        static const char* ToString(LogLevel::Level level);
+};
 
 //日志事件
     class LogEvent{
@@ -20,7 +65,10 @@ namespace sylar{
         public:
 
         typedef std::shared_ptr<LogEvent> ptr;
-        LogEvent(const char* file,int32_t m_line,uint32_t elapse,uint32_t thread_id,uint32_t fiber_id,uint64_t time);
+
+        LogEvent(std::shared_ptr<Logger> logger,LogLevel::Level level, const char* file,int32_t m_line,uint32_t elapse,uint32_t thread_id,uint32_t fiber_id,uint64_t time);
+
+        //  ~LogEvent();
 
         const char* getFile()const{return m_file;}
 
@@ -38,6 +86,13 @@ namespace sylar{
 
         std::stringstream& getSS() {return m_ss;}
 
+        std::shared_ptr<Logger> getLogger() const{return m_logger;}
+
+        LogLevel::Level getLevel() const{return m_level;}
+
+        void format (const char*fmt,va_list al);
+
+        void format(const char* fmt,...);
 
         private:
         const char* m_file=nullptr; //文件名
@@ -48,25 +103,33 @@ namespace sylar{
         std::stringstream m_ss; //
         uint64_t m_time;//时间戳
 
+        std::shared_ptr<Logger> m_logger;
+
+        LogLevel::Level m_level;
+
 
     };
 
 
-//日志级别
-class LogLevel{
-    public:
-        enum Level{
-                UNKNOWN=0,
-                DEBUG=1,
-                INFO=2,
-                WARN=3,
-                ERROR=4,
-                FATAL=5
-            };//日志级别
-            
-            
-        static const char* ToString(LogLevel::Level level);
-};
+
+    class LogEventWrap{
+
+public:
+    LogEventWrap(LogEvent::ptr e);
+
+    ~LogEventWrap();
+
+    std::stringstream& getSS();
+
+    LogEvent::ptr getEvent()const{return m_event;}
+
+private:
+
+    LogEvent::ptr m_event;
+    };
+
+
+
 
 
 //日志格式器
@@ -187,47 +250,29 @@ class FileLogAppender : public LogAppender{
     std::string m_filename;
     std::ofstream m_filestream;
 };
+
+
+//Logger 管理器
+class LoggerManager {
+
+    public:
+        LoggerManager();
+
+        Logger::ptr getLogger(const std::string& name);
+
+        void init();
+
+
+    private:
+
+        std::map<std::string,Logger::ptr> m_loggers;
+        Logger::ptr m_root;
+
+};
+
+typedef sylar::Singleton<LoggerManager> LoggerMgr;
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

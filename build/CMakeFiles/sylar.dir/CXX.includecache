@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/syr/桌面/serverDev/sylar/log.cpp
+/home/syr/桌面/serverDev/sylar/log.cc
 iostream
 -
 sstream
@@ -36,5 +36,31 @@ fstream
 sstream
 -
 vector
+-
+map
+-
+singleton.h
+/home/syr/桌面/serverDev/sylar/singleton.h
+stdarg.h
+-
+
+/home/syr/桌面/serverDev/sylar/singleton.h
+
+/home/syr/桌面/serverDev/sylar/util.cc
+util.h
+/home/syr/桌面/serverDev/sylar/util.h
+
+/home/syr/桌面/serverDev/sylar/util.h
+pthread.h
+-
+sys/types.h
+-
+sys/syscall.h
+-
+stdio.h
+-
+unistd.h
+-
+stdint.h
 -
 

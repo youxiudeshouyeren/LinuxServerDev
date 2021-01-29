@@ -139,59 +139,86 @@ sylar/fast:
 	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/build
 .PHONY : sylar/fast
 
-sylar/log.o: sylar/log.cpp.o
+sylar/log.o: sylar/log.cc.o
 
 .PHONY : sylar/log.o
 
 # target to build an object file
-sylar/log.cpp.o:
-	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/log.cpp.o
-.PHONY : sylar/log.cpp.o
+sylar/log.cc.o:
+	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/log.cc.o
+.PHONY : sylar/log.cc.o
 
-sylar/log.i: sylar/log.cpp.i
+sylar/log.i: sylar/log.cc.i
 
 .PHONY : sylar/log.i
 
 # target to preprocess a source file
-sylar/log.cpp.i:
-	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/log.cpp.i
-.PHONY : sylar/log.cpp.i
+sylar/log.cc.i:
+	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/log.cc.i
+.PHONY : sylar/log.cc.i
 
-sylar/log.s: sylar/log.cpp.s
+sylar/log.s: sylar/log.cc.s
 
 .PHONY : sylar/log.s
 
 # target to generate assembly for a file
-sylar/log.cpp.s:
-	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/log.cpp.s
-.PHONY : sylar/log.cpp.s
+sylar/log.cc.s:
+	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/log.cc.s
+.PHONY : sylar/log.cc.s
 
-tests/test.o: tests/test.cpp.o
+sylar/util.o: sylar/util.cc.o
+
+.PHONY : sylar/util.o
+
+# target to build an object file
+sylar/util.cc.o:
+	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/util.cc.o
+.PHONY : sylar/util.cc.o
+
+sylar/util.i: sylar/util.cc.i
+
+.PHONY : sylar/util.i
+
+# target to preprocess a source file
+sylar/util.cc.i:
+	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/util.cc.i
+.PHONY : sylar/util.cc.i
+
+sylar/util.s: sylar/util.cc.s
+
+.PHONY : sylar/util.s
+
+# target to generate assembly for a file
+sylar/util.cc.s:
+	$(MAKE) -f CMakeFiles/sylar.dir/build.make CMakeFiles/sylar.dir/sylar/util.cc.s
+.PHONY : sylar/util.cc.s
+
+tests/test.o: tests/test.cc.o
 
 .PHONY : tests/test.o
 
 # target to build an object file
-tests/test.cpp.o:
-	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cpp.o
-.PHONY : tests/test.cpp.o
+tests/test.cc.o:
+	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cc.o
+.PHONY : tests/test.cc.o
 
-tests/test.i: tests/test.cpp.i
+tests/test.i: tests/test.cc.i
 
 .PHONY : tests/test.i
 
 # target to preprocess a source file
-tests/test.cpp.i:
-	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cpp.i
-.PHONY : tests/test.cpp.i
+tests/test.cc.i:
+	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cc.i
+.PHONY : tests/test.cc.i
 
-tests/test.s: tests/test.cpp.s
+tests/test.s: tests/test.cc.s
 
 .PHONY : tests/test.s
 
 # target to generate assembly for a file
-tests/test.cpp.s:
-	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cpp.s
-.PHONY : tests/test.cpp.s
+tests/test.cc.s:
+	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/tests/test.cc.s
+.PHONY : tests/test.cc.s
 
 # Help Target
 help:
@@ -206,6 +233,9 @@ help:
 	@echo "... sylar/log.o"
 	@echo "... sylar/log.i"
 	@echo "... sylar/log.s"
+	@echo "... sylar/util.o"
+	@echo "... sylar/util.i"
+	@echo "... sylar/util.s"
 	@echo "... tests/test.o"
 	@echo "... tests/test.i"
 	@echo "... tests/test.s"
