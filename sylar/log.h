@@ -12,6 +12,7 @@
 #include<map>
 #include"singleton.h"
 #include<stdarg.h>
+#include"util.h"
 
 
 #define SYLAR_LOG_LEVEL(logger,level)\
@@ -37,6 +38,8 @@
 #define SYLAR_LOG_FMT_WARN(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::WARN,fmt,__VA_ARGS__)
 #define SYLAR_LOG_FMT_ERROR(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::ERROR,fmt,__VA_ARGS__)
 #define SYLAR_LOG_FMT_FATAL(logger,fmt,...) SYLAR_LOG_FMT_LEVEL(logger,sylar::LogLevel::FATAL,fmt,__VA_ARGS__)
+
+#define SYLAR_LOG_ROOT() sylar::LoggerMgr::GetInstance()->getRoot()
 
 
 namespace sylar{
@@ -262,6 +265,8 @@ class LoggerManager {
 
         void init();
 
+        Logger::ptr getRoot() const{return m_root;}
+
 
     private:
 
@@ -271,6 +276,8 @@ class LoggerManager {
 };
 
 typedef sylar::Singleton<LoggerManager> LoggerMgr;
+
+
     
 }
 

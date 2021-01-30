@@ -1,0 +1,2 @@
+2021-01-30 11:23:35	 [INFO]	[12054]	[root]	 /home/syr/桌面/serverDev/tests/test.cc:15	 ttest Iinfo  
+2021-01-30 11:23:35	 [ERROR]	[12054]	[root]	 /home/syr/桌面/serverDev/tests/test.cc:17	 test fmt logger error 你好啊  

@@ -6,6 +6,18 @@
 
 #IncludeRegexTransform: 
 
+/home/syr/桌面/serverDev/sylar/config.h
+memory
+-
+sstream
+-
+boost/lexical_cast.hpp
+-
+map
+-
+log.h
+/home/syr/桌面/serverDev/sylar/log.h
+
 /home/syr/桌面/serverDev/sylar/log.h
 string
 -
@@ -46,11 +58,9 @@ unistd.h
 stdint.h
 -
 
-/home/syr/桌面/serverDev/tests/test.cc
-iostream
--
+/home/syr/桌面/serverDev/tests/test_config.cc
+../sylar/config.h
+/home/syr/桌面/serverDev/sylar/config.h
 ../sylar/log.h
 /home/syr/桌面/serverDev/sylar/log.h
-../sylar/util.h
-/home/syr/桌面/serverDev/sylar/util.h
 

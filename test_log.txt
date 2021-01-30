@@ -1,2 +1,2 @@
-2021-01-29 19:11:40	 [INFO]	[8653]	[root]	 /home/syr/桌面/serverDev/tests/test.cc:15	 ttest Iinfo  
-2021-01-29 19:11:40	 [ERROR]	[8653]	[root]	 /home/syr/桌面/serverDev/tests/test.cc:17	 test fmt logger error 你好啊  
+2021-01-30 13:31:21	 [INFO]	[56166]	[root]	 /home/syr/桌面/serverDev/tests/test.cc:15	 ttest Iinfo  
+2021-01-30 13:31:21	 [ERROR]	[56166]	[root]	 /home/syr/桌面/serverDev/tests/test.cc:17	 test fmt logger error 你好啊  
