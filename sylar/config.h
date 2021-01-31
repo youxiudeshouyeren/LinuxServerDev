@@ -164,6 +164,51 @@ namespace sylar
 
 
 
+//unordered_set与string
+//----------------------------------------------------------------
+
+   template <class T> //TODO: 还有这写法？
+    class LexicalCast<std::string, std::unordered_set<T>>
+    {
+
+    public:
+        std::unordered_set<T> operator()(const std::string &v)
+        {
+            YAML::Node node = YAML::Load(v);
+            typename std::unordered_set<T> vec; //模板在实例化之前并不知道std::vector<T>是什么，使用typename可以让定义确认下来
+            std::stringstream ss;
+            for (size_t i = 0; i < node.size(); ++i)
+            {
+                ss.str("");
+                ss << node[i];
+                
+                vec.insert(LexicalCast<std::string, T>()(ss.str()));// 相比list的改动
+            }
+
+            return vec;
+        }
+    };
+
+    template <class T> //TODO: 还有这写法？
+    class LexicalCast<std::unordered_set<T>, std::string>
+    {
+
+    public:
+        std::string operator()(const std::unordered_set<T> &v)
+        {
+            YAML::Node node;
+            for (auto &i : v)
+            {
+                node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
+            }
+
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+
     class ConfigVarBase
     {
     public:
