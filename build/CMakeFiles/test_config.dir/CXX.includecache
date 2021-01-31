@@ -17,6 +17,8 @@ map
 -
 log.h
 /home/syr/桌面/serverDev/sylar/log.h
+yaml-cpp/yaml.h
+-
 
 /home/syr/桌面/serverDev/sylar/log.h
 string

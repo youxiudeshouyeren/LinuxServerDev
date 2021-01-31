@@ -171,6 +171,9 @@ LinuxServerDev_BINARY_DIR:STATIC=/home/syr/桌面/serverDev/build
 //Value Computed by CMake
 LinuxServerDev_SOURCE_DIR:STATIC=/home/syr/桌面/serverDev
 
+//Path to a library.
+YAMLCPP:FILEPATH=/usr/local/lib/libyaml-cpp.a
+
 //Dependencies for target
 sylar_LIB_DEPENDS:STATIC=
 
