@@ -2,68 +2,135 @@
 #define __SYLAR_CONFIG_H__
 
 #include <memory>
+#include<string>
 #include <sstream>
 #include <boost/lexical_cast.hpp> //TODO:待查lexical_cast
 #include <map>
 #include "log.h"
 #include <yaml-cpp/yaml.h>
+#include <vector>
+#include <set>
+#include <list>
+#include <unordered_map>
+#include <unordered_set> //TODO:区别
 
 namespace sylar
 {
 
-
     //针对基础类型的转换 从F 类型 转换为 T类型
-    template<class F,class T>
-    class LexicalCast{
-        public:
-        T operator()(const F&v){ 
+    template <class F, class T>
+    class LexicalCast
+    {
+    public:
+        T operator()(const F &v)
+        {
             return boost::lexical_cast<T>(v);
         }
     };
 
 
 
-    template<class T> //TODO: 还有这写法？
-    class LexicalCast<std::string,std::vector<T>>{
 
-            public:
-            std::vector<T> operator()(const std::string& v){
-                YAML::Node node=YAML::Load(v);
-                typename std::vector<T> vec; //模板在实例化之前并不知道std::vector<T>是什么，使用typename可以让定义确认下来
-                std::stringstream ss;
-                for(size_t i=0;i<node.size();++i){
-                    ss.str("");
-                    ss<<node[i];
-                    vec.push_back( LexicalCast<std::string,T>()(ss.str()));
-                }
+// vector与string
+//----------------------------------------------------------------
+    template <class T> //TODO: 还有这写法？
+    class LexicalCast<std::string, std::vector<T>>
+    {
 
-                return vec;
+    public:
+        std::vector<T> operator()(const std::string &v)
+        {
+            YAML::Node node = YAML::Load(v);
+            typename std::vector<T> vec; //模板在实例化之前并不知道std::vector<T>是什么，使用typename可以让定义确认下来
+            std::stringstream ss;
+            for (size_t i = 0; i < node.size(); ++i)
+            {
+                ss.str("");
+                ss << node[i];
+                vec.push_back(LexicalCast<std::string, T>()(ss.str()));
             }
+
+            return vec;
+        }
     };
 
-     template<class T> //TODO: 还有这写法？
-    class LexicalCast<std::vector<T>,std::string>{
+    template <class T> //TODO: 还有这写法？
+    class LexicalCast<std::vector<T>, std::string>
+    {
 
-            public:
-            std::string operator()(const std::vector<T>& v){ 
-                YAML::Node node;
-                for(auto& i:v){ 
-                    node.push_back(YAML::Load( LexicalCast<T,std::string>()(i)));
-                }
-
-                std::stringstream ss;
-                ss<<node;
-                return ss.str();
+    public:
+        std::string operator()(const std::vector<T> &v)
+        {
+            YAML::Node node;
+            for (auto &i : v)
+            {
+                node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
             }
+
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
     };
+
+
+//list与string
+//----------------------------------------------------------------
+
+   template <class T> //TODO: 还有这写法？
+    class LexicalCast<std::string, std::list<T>>
+    {
+
+    public:
+        std::list<T> operator()(const std::string &v)
+        {
+            YAML::Node node = YAML::Load(v);
+            typename std::list<T> vec; //模板在实例化之前并不知道std::vector<T>是什么，使用typename可以让定义确认下来
+            std::stringstream ss;
+            for (size_t i = 0; i < node.size(); ++i)
+            {
+                ss.str("");
+                ss << node[i];
+                vec.push_back(LexicalCast<std::string, T>()(ss.str()));
+            }
+
+            return vec;
+        }
+    };
+
+    template <class T> //TODO: 还有这写法？
+    class LexicalCast<std::list<T>, std::string>
+    {
+
+    public:
+        std::string operator()(const std::list<T> &v)
+        {
+            YAML::Node node;
+            for (auto &i : v)
+            {
+                node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
+            }
+
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
+        }
+    };
+
+
+
+
+
+
 
     class ConfigVarBase
     {
     public:
         typedef std::shared_ptr<ConfigVarBase> ptr;
 
-        ConfigVarBase(const std::string &name, const std::string &description = "") : m_name(name), m_description(description) {
-            std::transform(m_name.begin(), m_name.end(),m_name.begin(),::tolower);//名称转换为小写
+        ConfigVarBase(const std::string &name, const std::string &description = "") : m_name(name), m_description(description)
+        {
+            std::transform(m_name.begin(), m_name.end(), m_name.begin(), ::tolower); //名称转换为小写
         }
 
         virtual ~ConfigVarBase() {}
@@ -72,7 +139,7 @@ namespace sylar
 
         const std::string &getDescription() const { return m_description; }
 
-        virtual std::string toString() = 0; 
+        virtual std::string toString() = 0;
 
         virtual bool fromString(const std::string &val) = 0;
 
@@ -81,15 +148,10 @@ namespace sylar
         std::string m_description;
     };
 
-
-
-
-
-
-//FromStr T operator()(const std::string&)
-//TOStr std::string operator()(const T&)
-//类型的仿函数转换具有默认参数
-    template <class T,class FromStr=LexicalCast<std::string,T>, class ToStr=LexicalCast<T,std::string>>
+    //FromStr T operator()(const std::string&)
+    //TOStr std::string operator()(const T&)
+    //类型的仿函数转换具有默认参数
+    template <class T, class FromStr = LexicalCast<std::string, T>, class ToStr = LexicalCast<T, std::string>>
     class ConfigVar : public ConfigVarBase
     {
     public:
@@ -101,8 +163,8 @@ namespace sylar
         {
             try
             {
-               // return boost::lexical_cast<std::string>(m_val);
-               return ToStr()(m_val);
+                // return boost::lexical_cast<std::string>(m_val);
+                return ToStr()(m_val);
             }
             catch (std::exception &e)
             {
@@ -115,8 +177,8 @@ namespace sylar
         {
             try
             {
-               // m_val = boost::lexical_cast<T>(val);
-               setValue(FromStr()(val));
+                // m_val = boost::lexical_cast<T>(val);
+                setValue(FromStr()(val));
                 return true;
             }
             catch (std::exception &e)
@@ -150,8 +212,6 @@ namespace sylar
             return std::dynamic_pointer_cast<ConfigVar<T>>(it->second); //TODO: dynamic_pointer_cast 当指针是智能指针时候，向下转换，父类指针向子类指针转换
         }
 
-        
-
         template <class T> //TODO：模板子类继承非模板子类   返回值前面加typename
         static typename ConfigVar<T>::ptr Lookup(const std::string &name, const T &default_value, const std::string &description = "")
         {
@@ -174,10 +234,10 @@ namespace sylar
             return v;
         }
 
-       static ConfigVarBase::ptr  LookupBase(const std::string& name);
-        
+        static ConfigVarBase::ptr LookupBase(const std::string &name);
 
-    static void LoadFromYaml(const YAML::Node root);
+        static void LoadFromYaml(const YAML::Node root);
+
     private:
         static ConfigVarMap s_datas;
     };

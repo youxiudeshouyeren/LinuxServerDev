@@ -9,6 +9,8 @@
 /home/syr/桌面/serverDev/sylar/config.h
 memory
 -
+string
+-
 sstream
 -
 boost/lexical_cast.hpp
@@ -18,6 +20,16 @@ map
 log.h
 /home/syr/桌面/serverDev/sylar/log.h
 yaml-cpp/yaml.h
+-
+vector
+-
+set
+-
+list
+-
+unordered_map
+-
+unordered_set
 -
 
 /home/syr/桌面/serverDev/sylar/log.h

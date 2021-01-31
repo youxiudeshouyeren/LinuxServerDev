@@ -20,3 +20,4 @@ system:
     int_vec: 
       - 10
       - 30
+    int_list: [19,20,30]
