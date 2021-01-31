@@ -10,7 +10,7 @@ sylar::ConfigVar<std::vector<int>>::ptr g_int_vect_init_value_config=sylar::Conf
 
 sylar::ConfigVar<std::list<int>>::ptr g_int_list_init_value_config=sylar::Config::Lookup("system.int_list",std::list<int>{1,2,3},"system int list");
 
-
+sylar::ConfigVar<std::set<int> >::ptr g_int_set_init_value_config=sylar::Config::Lookup("system.int_set",std::set<int>{1,2,3},"system int set");
 
 //打印YAML
 void print_yaml(const YAML::Node& node,int level) {
@@ -57,11 +57,13 @@ auto& v=g_var->getValue();\
 for(auto& i:v){\
     SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<#prefix" " #name": "<<i;\
 }\
+SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<#prefix" " #name" yaml: "<<g_var->toString();\
 }
 
 
 XX(g_int_vect_init_value_config,int_vec,before);
 XX(g_int_list_init_value_config,int_list,before);
+XX(g_int_set_init_value_config,int_set,before);
     // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"before"<<g_int_value_config->getValue();
     // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"before"<<g_float_value_config->toString();
     
@@ -75,6 +77,7 @@ XX(g_int_list_init_value_config,int_list,before);
 
  XX(g_int_vect_init_value_config,int_vec,after);
 XX(g_int_list_init_value_config,int_list,after);
+XX(g_int_set_init_value_config,int_set,after);
 
     // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"after"<<g_int_value_config->getValue();
     // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"after"<<g_float_value_config->toString();
