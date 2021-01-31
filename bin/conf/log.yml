@@ -22,3 +22,6 @@ system:
       - 30
     int_list: [19,20,30]
     int_set: [12,12,20]
+    int_map: 
+      k: 30
+      m: 12
