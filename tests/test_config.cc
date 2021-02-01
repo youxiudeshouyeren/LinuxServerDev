@@ -132,6 +132,11 @@ public:
         ss << "(Person name=" << m_name << " age=" << m_age << " sex=" << m_sex << " )";
         return ss.str();
     }
+
+    bool operator==(const Person &other) const
+    {
+        return this->m_name == other.m_name && this->m_age == other.m_age && this->m_sex == other.m_sex;
+    }
 };
 
 namespace sylar
@@ -183,7 +188,7 @@ sylar::ConfigVar<std::map<std::string, Person>>::ptr g_init_map_person = sylar::
 void test_class()
 {
 
-  //  SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "  before" << g_init_person->getValue().toString() << " -  " << g_init_person->toString();
+    //  SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "  before" << g_init_person->getValue().toString() << " -  " << g_init_person->toString();
 
 #define XX_PM(g_var, name, prefix)                                                                          \
     {                                                                                                       \
@@ -193,14 +198,18 @@ void test_class()
             SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << prefix << " : " << i.first << " - " << i.second.toString(); \
         }                                                                                                   \
     }
-
-    XX_PM(g_init_map_person,"","before person map:");
+ g_init_person->addListener(10, [](const Person &old_value, const Person &new_value) {
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << " old value: " << old_value.toString() << " new value: " << new_value.toString();
+    });
+    XX_PM(g_init_map_person, "", "before person map:");
     YAML::Node root = YAML::LoadFile("/home/syr/桌面/serverDev/bin/conf/log.yml");
     sylar::Config::LoadFromYaml(root);
 
-   // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "  after" << g_init_person->getValue().toString() << " -  " << g_init_person->toString();
+    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "  after" << g_init_person->getValue().toString() << " -  " << g_init_person->toString();
 
-     XX_PM(g_init_map_person,"","after person map:");
+    XX_PM(g_init_map_person, "", "after person map:");
+
+   
 }
 
 int main(int argc, char **argv)

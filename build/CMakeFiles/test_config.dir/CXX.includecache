@@ -31,6 +31,10 @@ unordered_map
 -
 unordered_set
 -
+functional
+-
+stdint.h
+-
 
 /home/syr/桌面/serverDev/sylar/log.h
 string
