@@ -1,10 +1,13 @@
 #include "../sylar/config.h"
 #include "../sylar/log.h"
 #include <yaml-cpp/yaml.h>
+#include<iostream>
 
 
 sylar::ConfigVar<int>::ptr g_int_value_config=sylar::Config::Lookup("system.port",(int)8080,"system port");
 sylar::ConfigVar<float>::ptr g_float_value_config=sylar::Config::Lookup("system.value",(float)10.2f,"system value");
+
+sylar::ConfigVar<float>::ptr g_float_error_value_config=sylar::Config::Lookup("system.port",(float)1000,"system port");
 
 sylar::ConfigVar<std::vector<int>>::ptr g_int_vect_init_value_config=sylar::Config::Lookup("system.int_vec",std::vector<int>{1,2,3},"system int vec");
 
@@ -79,14 +82,14 @@ SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<#prefix" " #name" yaml: "<<g_var->toString();\
 }
 
 
-
+ //SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"before"<<g_float_error_value_config->getValue();
 XX(g_int_vect_init_value_config,int_vec,before);
 XX(g_int_list_init_value_config,int_list,before);
 XX(g_int_set_init_value_config,int_set,before);
 XX(g_int_unorderedset_init_value_config,int_unordered_set,before);
 XX_M(g_int_map_init_value_config,int_map,before);
 XX_M(g_int_unorderedmap_init_value_config,int_unorderedmap,before);
-    // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"before"<<g_int_value_config->getValue();
+    
     // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"before"<<g_float_value_config->toString();
     
     // auto v=g_int_vect_init_value_config->getValue();
@@ -115,14 +118,93 @@ XX_M(g_int_unorderedmap_init_value_config,int_unorderedmap,after);
 
 
 
+
+
+
+
+
+class Person{
+public:
+
+
+std::string m_name;
+int m_age=0;
+bool m_sex=0;
+
+std::string  toString() const{
+    std::stringstream ss;
+    ss<<"(Person name="<<m_name<<" age="<<m_age<<" sex="<<m_sex<<" )";
+    return ss.str();
+}
+};
+
+namespace sylar{
+       
+    
+
+ //person与string
+//----------------------------------------------------------------
+
+   template <> 
+    class LexicalCast<std::string, Person>
+    {
+
+    public:
+        Person operator()(const std::string &v)
+        {
+            YAML::Node node = YAML::Load(v);
+            Person p;
+            p.m_name=node["name"].as<std::string>();
+            p.m_age=node["age"].as<int>();
+            p.m_sex=node["sex"].as<bool>();
+              std::cout << "调用pstring转person"<<std::endl;
+            return p;
+        }
+    };
+
+    template <> 
+    class LexicalCast<Person, std::string>
+    {
+
+    public:
+        std::string operator()(const Person &v)
+        {
+            YAML::Node node;
+            node["name"]=v.m_name;
+            node["sex"]=v.m_sex;
+            node["age"]=v.m_age;
+            std::stringstream ss;
+            ss << node;
+            std::cout << "调用person转string"<<std::endl;
+            return ss.str();
+        }
+    };
+}
+
+sylar::ConfigVar<Person>::ptr g_init_person=sylar::Config::Lookup("class.person",Person(),"system person");
+
+void test_class(){
+
+SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) <<"  before"<<g_init_person->getValue().toString()<<" -  "<<g_init_person->toString();
+
+
+ YAML::Node root=YAML::LoadFile("/home/syr/桌面/serverDev/bin/conf/log.yml");
+ sylar::Config::LoadFromYaml(root);
+
+
+ SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) <<"  after"<<g_init_person->getValue().toString()<<" -  "<<g_init_person->toString();
+
+}
+
+
 int main(int argc, char** argv){
   //  test_yaml();
-  test_config();
+  //test_config();
 
 // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<g_init_value_config->getValue();
 
 // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<g_init_value_config->toString();
-
+test_class();
 
 
     return 0;

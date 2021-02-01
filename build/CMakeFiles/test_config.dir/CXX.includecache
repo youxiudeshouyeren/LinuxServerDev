@@ -79,6 +79,8 @@ stdint.h
 /home/syr/桌面/serverDev/sylar/log.h
 yaml-cpp/yaml.h
 -
+iostream
+-
 
 /usr/local/include/boost/array.hpp
 boost/detail/workaround.hpp

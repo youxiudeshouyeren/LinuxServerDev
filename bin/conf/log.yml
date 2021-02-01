@@ -29,3 +29,8 @@ system:
     int_unorderedmap:
       k: 100
       m: 21212
+class:
+    person:
+        age: 31
+        sex: true
+        name: sylar
