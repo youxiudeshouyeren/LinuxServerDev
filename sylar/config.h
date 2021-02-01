@@ -398,7 +398,7 @@ namespace sylar
 
             auto it=s_datas.find(name);
             if(it!=s_datas.end()){
-                auto temp=std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
+                auto temp=std::dynamic_pointer_cast<ConfigVar<T>>(it->second);  //转换失败返回空指针 则类型不匹配
                 if(temp){
                      SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "Lookup name =" << name << " exists";
                 return temp;

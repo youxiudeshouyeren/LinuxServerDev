@@ -34,3 +34,12 @@ class:
         age: 31
         sex: true
         name: sylar
+    map:
+      sylar01:
+        name: sylar01
+        age: 18
+        sex: false
+      sylar02:
+        name: sylar02
+        age: 20
+        sex: true
