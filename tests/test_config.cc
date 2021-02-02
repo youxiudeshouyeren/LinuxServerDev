@@ -101,7 +101,7 @@ void test_config()
     //     SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<"before int_vec "<<i;
     // }
 
-    YAML::Node root = YAML::LoadFile("/home/syr/桌面/serverDev/bin/conf/log.yml");
+    YAML::Node root = YAML::LoadFile("/home/syr/桌面/serverDev/bin/conf/test.yml");
     sylar::Config::LoadFromYaml(root);
 
     XX(g_int_vect_init_value_config, int_vec, after);
@@ -157,7 +157,7 @@ namespace sylar
             p.m_name = node["name"].as<std::string>();
             p.m_age = node["age"].as<int>();
             p.m_sex = node["sex"].as<bool>();
-            std::cout << "调用pstring转person" << std::endl;
+            std::cout << "调用string转person" << std::endl;
             return p;
         }
     };

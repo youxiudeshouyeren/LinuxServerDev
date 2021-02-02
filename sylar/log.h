@@ -42,9 +42,13 @@
 #define SYLAR_LOG_ROOT() sylar::LoggerMgr::GetInstance()->getRoot()
 
 
+#define SYLAR_LOG_NAME(name) sylar::LoggerMgr::GetInstance()->getLogger(name) 
+
+
 namespace sylar{
 
     class Logger;
+    class LoggerManager;
 
     //日志级别
 class LogLevel{
@@ -188,6 +192,7 @@ private:
 
     //日志输出器
     class Logger :public std::enable_shared_from_this<Logger>{
+        friend class LoggerManager;
 
         public:
 
@@ -219,6 +224,8 @@ private:
         std::list<LogAppender::ptr> m_appenders; //appenders集合
 
         LogFormatter::ptr m_formatter;
+
+        Logger::ptr m_root;
 
     };
 

@@ -1,0 +1,45 @@
+logs:
+    - name: root
+      level: info
+      formatter: '%d%T%m%N'
+      appenders:
+          - type: FileLogAppender
+            file: /apps/logs/sylar/root.txt
+          - type: StdoutLogAppender
+    - name: system
+      level: info
+      formatter: '%d%T%m%N'
+      appenders:
+          - type: FileLogAppender
+            file: /apps/logs/sylar/system.txt
+          - type: StdoutLogAppender
+
+system:
+    port: 9900
+    value: 15
+    int_vec: 
+      - 10
+      - 30
+    int_list: [19,20,30]
+    int_set: [12,12,20]
+    int_unorderedset: [1000,20,12,3,3]
+    int_map: 
+      k: 30
+      m: 12
+    int_unorderedmap:
+      k: 100
+      m: 21212
+class:
+    person:
+        age: 31
+        sex: true
+        name: sylar
+    map:
+      sylar01:
+        name: sylar01
+        age: 18
+        sex: false
+      sylar02:
+        name: sylar02
+        age: 20
+        sex: true
