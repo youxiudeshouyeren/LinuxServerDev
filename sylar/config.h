@@ -359,6 +359,7 @@ namespace sylar
         }
 
         const T getValue() const { return m_val; }
+
         void setValue(const T &v)
         {
             if (v == m_val)
@@ -367,7 +368,7 @@ namespace sylar
             }
             for (auto &i : m_cbs)
             {
-                i.second(m_val, v);
+                i.second(m_val, v);//修改前执行配置事件的回调
             }
             m_val = v;
         }
@@ -459,7 +460,12 @@ namespace sylar
         static void LoadFromYaml(const YAML::Node root);
 
     private:
-        static ConfigVarMap s_datas;
+        // static ConfigVarMap s_datas;
+        //TODO: 静态成员的初始化顺序  s_datas必须先初始化
+        static ConfigVarMap& GetDatas(){
+            static ConfigVarMap s_datas;
+            return s_datas;
+        }
     };
 } // namespace sylar
 

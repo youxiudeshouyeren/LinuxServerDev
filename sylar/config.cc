@@ -2,11 +2,11 @@
 
 namespace sylar{
 
-    Config::ConfigVarMap Config::s_datas; //静态类型记得初始化
+   // Config::ConfigVarMap Config::s_datas; //静态类型记得初始化
 
     ConfigVarBase::ptr Config::LookupBase(const std::string& name){
-        auto it=s_datas.find(name);
-        return it==s_datas.end() ?nullptr :it->second;
+        auto it=GetDatas().find(name);
+        return it==GetDatas().end() ?nullptr :it->second;
 
     }
 

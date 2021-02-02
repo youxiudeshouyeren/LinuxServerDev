@@ -84,6 +84,24 @@ namespace sylar
         }
     }
 
+    LogLevel::Level LogLevel::FromString(const std::string &str)
+    {
+
+#define XX(name)               \
+    if (str == #name)          \
+    {                          \
+        return LogLevel::name; \
+    }
+
+        XX(DEBUG);
+        XX(INFO);
+        XX(WARN);
+        XX(ERROR);
+        XX(FATAL);
+        return LogLevel::UNKNOWN;
+
+#undef XX
+    }
     class MessageFormatItem : public LogFormatter::FormatItem
     {
     public:
@@ -273,6 +291,28 @@ namespace sylar
                 break;
             }
         }
+    }
+
+    void Logger::cleanAppenders()
+    {
+        m_appenders.clear();
+    }
+
+    void Logger::setFormatter(LogFormatter::ptr formatter)
+    {
+
+        this->m_formatter = formatter;
+    }
+
+    void Logger::setFormatter(const std::string &value)
+    {
+        sylar::LogFormatter::ptr new_val(new sylar::LogFormatter(value));
+        if (new_val->isError())
+        {
+            std::cout << "Logger  set  formatter name=" << m_name << "  value= " << value << " invalid formatter" << std::endl; //不能在日志里使用日志 防止死循环
+            return;                                                                                                             // 格式错误则不更改默认值
+        }
+        this->m_formatter = new_val;
     }
 
     void Logger::log(LogLevel::Level level, const LogEvent::ptr event)
@@ -520,6 +560,7 @@ namespace sylar
                 if (it == s_format_items.end())
                 {
                     m_items.push_back(FormatItem::ptr(new StringFormatItem("<<error_format %" + std::get<0>(i) + ">>")));
+                    m_error = true; //格式错误
                 }
                 else
                 {
@@ -595,31 +636,177 @@ namespace sylar
             return name == oth.name && level == oth.level && formatter == oth.formatter && appenders == oth.appenders;
         }
 
-        bool operator<(const LogDefine &oth) const{
-            return name < oth.name;// TODO: 为什么set要重载小于号
+        bool operator<(const LogDefine &oth) const
+        {
+            return name < oth.name; // TODO: 为什么set要重载小于号
+        }
+    };
+
+    template <> //TODO: 还有这写法？
+    class LexicalCast<std::string, std::set<LogDefine>>
+    {
+
+    public:
+        std::set<LogDefine> operator()(const std::string &v)
+        {
+            YAML::Node node = YAML::Load(v);
+            std::set<LogDefine> vec; //模板在实例化之前并不知道std::vector<T>是什么，使用typename可以让定义确认下来
+            std::stringstream ss;
+            for (size_t i = 0; i < node.size(); ++i)
+            {
+
+                auto n = node[i];
+                if (!n["name"].IsDefined())
+                {
+                    std::cout << "log config error： name is null," << n << std::endl;
+                    continue;
+                }
+
+                LogDefine ld;
+                ld.name = n["name"].as<std::string>();
+                ld.level = LogLevel::FromString(n["level"].IsDefined() ? n["level"].as<std::string>() : "");
+                if (n["formatter"].IsDefined())
+                {
+                    ld.formatter = n["formatter"].as<std::string>();
+                }
+                if (n["appenders"].IsDefined())
+                {
+                    for (size_t x = 0; x < n["formatter"].size(); ++x)
+                    {
+                        auto a = n["formatter"][x];
+                        if (!a["type"].IsDefined())
+                        {
+
+                            std::cout << "log config error： name is null," << n << std::endl;
+                            continue;
+                        }
+                        std::string type = a["type"].as<std::string>();
+                        LogAppenderDefine lad;
+                        if (type == "FileLogAppender")
+                        {
+                            lad.type = 1;
+                            if (!n["file"].IsDefined())
+                            {
+                                std::cout << "log config erro :  fileappenders file is null" << std::endl;
+                                continue;
+                            }
+
+                            lad.file = n["file"].as<std::string>();
+                            if (n["formatter"].IsDefined())
+                            {
+                                lad.formatter = n["formatter"].as<std::string>();
+                            }
+                        }
+                        else if (type == "StdoutLogAppender")
+                        {
+                            lad.type = 2;
+                        }
+                        else
+                        {
+                            std::cout << "log config error: appenders type is Invalid" << std::endl;
+                            continue;
+                        }
+                        ld.appenders.push_back(lad);
+                    }
+                }
+
+                vec.insert(ld);
+            }
+            return vec;
+        }
+    };
+
+    template <class T> //TODO: 还有这写法？
+    class LexicalCast<std::set<LogDefine>, std::string>
+    {
+
+    public:
+        std::string operator()(const std::set<LogDefine> &v)
+        {
+            YAML::Node node;
+            for (auto &i : v)
+            {
+                node.push_back(YAML::Load(LexicalCast<T, std::string>()(i)));
+            }
+
+            std::stringstream ss;
+            ss << node;
+            return ss.str();
         }
     };
 
     //配置系统中读取的
     sylar::ConfigVar<std::set<LogDefine>>::ptr g_log_defines = sylar::Config::Lookup("logs", std::set<LogDefine>(), "logs config");
 
-     
-    struct LogIniter{
-        LogIniter(){
-            g_log_defines->addListener(0xF1E231,[](const std::set<LogDefine>& old_values,const std::set<LogDefine>& new_values){
-                
-            });
-        }
+    struct LogIniter
+    {
+        LogIniter()
+        {
+            g_log_defines->addListener(0xF1E231, [](const std::set<LogDefine> &old_values, const std::set<LogDefine> &new_values) {
+            
+            SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<" on_logger_conf_changed";
+            
+            //新增
+            for (auto &i : new_values)
+            {
+                auto it = old_values.find(i);
+                sylar::Logger::ptr logger;
+                if (it == old_values.end())
+                {
+                    //没找到 说明新增Logger
+                    logger.reset(new sylar::Logger(i.name));
+                }
 
+                else
+                {
+                    if (!(i == *it))
+                    {
+                        //修改的Logger
+
+                        logger=SYLAR_LOG_NAME(i.name);
+                    }
+                    logger->setLevel(i.level);
+                    if (!i.formatter.empty())
+                    {
+                        logger->setFormatter(i.formatter);
+                    }
+
+                    logger->cleanAppenders();
+
+                    for (auto &a : i.appenders)
+                    {
+                        sylar::LogAppender::ptr ap;
+                        if (a.type == 1)
+                        {
+                            ap.reset(new FileLogAppender(a.file));
+                        }
+                        else if (a.type == 2)
+                        {
+                            ap.reset(new StdoutLogAppender);
+                        }
+                        ap->setLevel(a.level);
+                        logger->addAppender(ap);
+                    }
+                }
+
+                //删除
+                for (auto &i : old_values)
+                {
+                    auto it = new_values.find(i);
+                    if (it == new_values.end())
+                    {
+                        //删除logger
+
+                        auto logger = SYLAR_LOG_NAME(i.name);
+                        logger->setLevel((LogLevel::Level)100); //日志级别调高 隐藏
+                        logger->cleanAppenders();
+                    }
+                }
+            } });
+        }
     };
 
-    static LogIniter __log_initer;
-//TODO:在main函数执行之前执行事件
-
-    void LoggerManager::init()
-    {
-
-
-    }
+    static LogIniter __log_initer; //
+    //TODO:在main函数执行之前执行事件
 
 } // namespace sylar
