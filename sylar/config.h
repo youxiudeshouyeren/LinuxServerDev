@@ -325,7 +325,7 @@ namespace sylar
     {
     public:
         typedef std::shared_ptr<ConfigVar> ptr;
-        typedef std::function<void(const T &old_value, const T &new_value)> on_change_cb; //配置更改后的回调  //TODO:待查
+        typedef std::function<void (const T& old_value, const T& new_value)> on_change_cb; //配置更改后的回调  //TODO:待查
 
         ConfigVar(const std::string &name, const T &default_value, const std::string &description = "") : ConfigVarBase(name, description), m_val(default_value) {}
 
@@ -368,7 +368,7 @@ namespace sylar
             }
             for (auto &i : m_cbs)
             {
-                i.second(m_val, v);//修改前执行配置事件的回调
+                i.second(m_val, v); //修改前执行配置事件的回调
             }
             m_val = v;
         }
@@ -412,8 +412,8 @@ namespace sylar
         template <class T>
         static typename ConfigVar<T>::ptr Lookup(const std::string &name)
         {
-            auto it = s_datas.find(name);
-            if (it == s_datas.end())
+            auto it = GetDatas().find(name);
+            if (it == GetDatas().end())
             {
                 return nullptr;
             }
@@ -425,8 +425,8 @@ namespace sylar
         static typename ConfigVar<T>::ptr Lookup(const std::string &name, const T &default_value, const std::string &description = "")
         {
 
-            auto it = s_datas.find(name);
-            if (it != s_datas.end())
+            auto it = GetDatas().find(name);
+            if (it != GetDatas().end())
             {
                 auto temp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second); //转换失败返回空指针 则类型不匹配
                 if (temp)
@@ -450,7 +450,7 @@ namespace sylar
             }
 
             typename ConfigVar<T>::ptr v(new ConfigVar<T>(name, default_value, description));
-            s_datas[name] = v;
+            GetDatas()[name] = v;
 
             return v;
         }
@@ -462,7 +462,8 @@ namespace sylar
     private:
         // static ConfigVarMap s_datas;
         //TODO: 静态成员的初始化顺序  s_datas必须先初始化
-        static ConfigVarMap& GetDatas(){
+        static ConfigVarMap &GetDatas()
+        {
             static ConfigVarMap s_datas;
             return s_datas;
         }

@@ -49,7 +49,7 @@ namespace sylar
     public:
         enum Level
         {
-            UNKNOWN = 0,
+            UNKNOW = 0,
             DEBUG = 1,
             INFO = 2,
             WARN = 3,

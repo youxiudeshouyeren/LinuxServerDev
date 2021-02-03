@@ -6,7 +6,7 @@
 sylar::ConfigVar<int>::ptr g_int_value_config = sylar::Config::Lookup("system.port", (int)8080, "system port");
 sylar::ConfigVar<float>::ptr g_float_value_config = sylar::Config::Lookup("system.value", (float)10.2f, "system value");
 
-sylar::ConfigVar<float>::ptr g_float_error_value_config = sylar::Config::Lookup("system.port", (float)1000, "system port");
+//sylar::ConfigVar<float>::ptr g_float_error_value_config = sylar::Config::Lookup("system.port", (float)1000, "system port");
 
 sylar::ConfigVar<std::vector<int>>::ptr g_int_vect_init_value_config = sylar::Config::Lookup("system.int_vec", std::vector<int>{1, 2, 3}, "system int vec");
 
@@ -212,6 +212,13 @@ void test_class()
    
 }
 
+
+
+
+void test_log(){
+    YAML::Node root = YAML::LoadFile("/home/syr/桌面/serverDev/bin/conf/log.yml");
+    sylar::Config::LoadFromYaml(root);
+}
 int main(int argc, char **argv)
 {
     //  test_yaml();
@@ -220,7 +227,8 @@ int main(int argc, char **argv)
     // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<g_init_value_config->getValue();
 
     // SYLAR_LOG_INFO(SYLAR_LOG_ROOT())<<g_init_value_config->toString();
-    test_class();
+    //test_class();
+    test_log();
 
     return 0;
 }
