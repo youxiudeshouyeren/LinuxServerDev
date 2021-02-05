@@ -104,17 +104,23 @@ namespace sylar
     LogLevel::Level LogLevel::FromString(const std::string &str)
     {
 
-#define XX(name)               \
-    if (str == #name)          \
+#define XX(level,v)               \
+    if (str == #v)         \
     {                          \
-        return LogLevel::name; \
+        return LogLevel::level; \
     }
 
-        XX(DEBUG);
-        XX(INFO);
-        XX(WARN);
-        XX(ERROR);
-        XX(FATAL);
+        XX(DEBUG,debug);
+        XX(INFO,info);
+        XX(WARN,warn);
+        XX(ERROR,error);
+        XX(FATAL,fatal);
+
+        XX(DEBUG,DEBUG);
+        XX(INFO,INFO);
+        XX(WARN,WARN);
+        XX(ERROR,ERROR);
+        XX(FATAL,FATAL);
         return LogLevel::UNKNOW;
 
 #undef XX
@@ -460,7 +466,7 @@ namespace sylar
 
         for (auto &i : m_appenders)
         {
-            node["appender"].push_back(YAML::Load(i->toYamlString()));
+            node["appenders"].push_back(YAML::Load(i->toYamlString()));
         }
         std::stringstream ss;
         ss << node;

@@ -216,12 +216,16 @@ void test_class()
 
 
 void test_log(){
+    static sylar::Logger::ptr system_log=SYLAR_LOG_NAME("system");
+    SYLAR_LOG_INFO(system_log)<<"hello system"<<std::endl;
     std::cout << sylar::LoggerMgr::GetInstance()->toYamlString()<<std::endl;
     YAML::Node root = YAML::LoadFile("/home/syr/桌面/serverDev/bin/conf/log.yml");
     sylar::Config::LoadFromYaml(root);
 std::cout << "_______________________________________"<<std::endl;
 
       std::cout << sylar::LoggerMgr::GetInstance()->toYamlString()<<std::endl;
+
+      SYLAR_LOG_INFO(system_log)<<"hello system"<<std::endl;
 }
 int main(int argc, char **argv)
 {

@@ -2,11 +2,12 @@ logs:
     - name: root
       level: info
       appenders:
-          - type: FileLogAppender
+          - type: FdfggsileLogAppender
             file: root.txt
           - type: StdoutLogAppender
     - name: system
       level: info
+      formatter: '%d'
       appenders:
           - type: FileLogAppender
             file: system.txt
