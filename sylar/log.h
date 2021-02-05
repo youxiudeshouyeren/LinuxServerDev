@@ -58,7 +58,7 @@ namespace sylar
         }; //日志级别
 
         static const char *ToString(LogLevel::Level level);
-        static LogLevel::Level FromString(const std::string& str);
+        static LogLevel::Level FromString(const std::string &str);
     };
 
     //日志事件
@@ -139,9 +139,12 @@ namespace sylar
 
         void init();
 
-        bool isError(){
+        bool isError()
+        {
             return this->m_error;
         }
+
+        const std::string getPattern() const{return this->m_pattern;}
 
     public:
         class FormatItem
@@ -176,7 +179,9 @@ namespace sylar
 
         LogFormatter::ptr getFormatter() { return this->m_formatter; }
 
-        void setLevel(LogLevel::Level level) { this->m_level = level;}
+        void setLevel(LogLevel::Level level) { this->m_level = level; }
+
+        virtual std::string toYamlString() = 0;
 
     protected:
         LogLevel::Level m_level = LogLevel::DEBUG; //初始化一个等级
@@ -213,6 +218,8 @@ namespace sylar
         void setFormatter(const std::string &value);
         LogFormatter::ptr getFormatter() const { return this->m_formatter; }
 
+        std::string toYamlString();
+
     private:
         std::string m_name;      //日志名称
         LogLevel::Level m_level; //日志名称
@@ -232,6 +239,8 @@ namespace sylar
         typedef std::shared_ptr<StdoutLogAppender> ptr;
         void log(Logger::ptr logger, LogLevel::Level level, LogEvent::ptr event) override;
 
+        std::string toYamlString() override;
+
     private:
     };
 
@@ -245,6 +254,7 @@ namespace sylar
 
         //重新打开文件，文件打开成功返回true
         bool reopen();
+        std::string toYamlString() override;
 
     private:
         std::string m_filename;
@@ -263,6 +273,10 @@ namespace sylar
         void init();
 
         Logger::ptr getRoot() const { return m_root; }
+
+        std::string toYamlString();
+
+        // std::
 
     private:
         std::map<std::string, Logger::ptr> m_loggers;

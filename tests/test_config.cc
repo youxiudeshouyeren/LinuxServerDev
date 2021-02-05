@@ -216,8 +216,12 @@ void test_class()
 
 
 void test_log(){
+    std::cout << sylar::LoggerMgr::GetInstance()->toYamlString()<<std::endl;
     YAML::Node root = YAML::LoadFile("/home/syr/桌面/serverDev/bin/conf/log.yml");
     sylar::Config::LoadFromYaml(root);
+std::cout << "_______________________________________"<<std::endl;
+
+      std::cout << sylar::LoggerMgr::GetInstance()->toYamlString()<<std::endl;
 }
 int main(int argc, char **argv)
 {
