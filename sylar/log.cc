@@ -11,6 +11,62 @@
 namespace sylar
 {
 
+    //---------------------------------------------------------------------
+
+    /**
+      * @brief LogLevel类实现
+     */
+
+    const char *LogLevel::ToString(LogLevel::Level level)
+    {
+        switch (level)
+        {
+
+#define XX(name)         \
+    case LogLevel::name: \
+        return #name;    \
+        break;
+
+            XX(DEBUG);
+            XX(INFO);
+            XX(WARN);
+            XX(ERROR);
+            XX(FATAL);
+
+#undef XX
+
+        default:
+            return "UNKNOW";
+        }
+    }
+
+    
+
+    LogLevel::Level LogLevel::FromString(const std::string &str)
+    {
+
+#define XX(level, v)            \
+    if (str == #v)              \
+    {                           \
+        return LogLevel::level; \
+    }
+
+        XX(DEBUG, debug);
+        XX(INFO, info);
+        XX(WARN, warn);
+        XX(ERROR, error);
+        XX(FATAL, fatal);
+
+        XX(DEBUG, DEBUG);
+        XX(INFO, INFO);
+        XX(WARN, WARN);
+        XX(ERROR, ERROR);
+        XX(FATAL, FATAL);
+        return LogLevel::UNKNOW;
+
+#undef XX
+    }
+
     /**
  * @brief Construct a new Log Event:: Log Event object
  * 
@@ -78,64 +134,15 @@ namespace sylar
 *
 */
 
-    const char *LogLevel::ToString(LogLevel::Level level)
-    {
-        switch (level)
-        {
-
-#define XX(name)         \
-    case LogLevel::name: \
-        return #name;    \
-        break;
-
-            XX(DEBUG);
-            XX(INFO);
-            XX(WARN);
-            XX(ERROR);
-            XX(FATAL);
-
-#undef XX
-
-        default:
-            return "UNKNOW";
-        }
-    }
-
-    LogLevel::Level LogLevel::FromString(const std::string &str)
-    {
-
-#define XX(level,v)               \
-    if (str == #v)         \
-    {                          \
-        return LogLevel::level; \
-    }
-
-        XX(DEBUG,debug);
-        XX(INFO,info);
-        XX(WARN,warn);
-        XX(ERROR,error);
-        XX(FATAL,fatal);
-
-        XX(DEBUG,DEBUG);
-        XX(INFO,INFO);
-        XX(WARN,WARN);
-        XX(ERROR,ERROR);
-        XX(FATAL,FATAL);
-        return LogLevel::UNKNOW;
-
-#undef XX
-    }
     class MessageFormatItem : public LogFormatter::FormatItem
     {
     public:
         MessageFormatItem(const std::string &str = "")
         {
-            //std::cout <<"构造MessageFormatItem"<<std::endl;
         }
         void format(std::ostream &os, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) override
         {
 
-            //   std::cout<<"调用messageForma1"<<std::endl;
             os << event->getContent();
         }
     };
@@ -299,7 +306,7 @@ namespace sylar
     {
         if (!appender->getFormatter())
         {
-            appender->setFormatter(m_formatter); //如果appender没有formatter 就把自己的给他
+            appender->m_formatter = m_formatter; //如果appender没有formatter 就把自己的给他
         }
         m_appenders.push_back(appender);
     }
@@ -325,6 +332,14 @@ namespace sylar
     {
 
         this->m_formatter = formatter;
+
+        for (auto &i : m_appenders)
+        {
+            if (!i->m_hasFormatter)
+            {
+                i->m_formatter = formatter;
+            }
+        }
     }
 
     void Logger::setFormatter(const std::string &value)
@@ -335,7 +350,7 @@ namespace sylar
             std::cout << "Logger  set  formatter name=" << m_name << "  value= " << value << " invalid formatter" << std::endl; //不能在日志里使用日志 防止死循环
             return;                                                                                                             // 格式错误则不更改默认值
         }
-        this->m_formatter = new_val;
+        setFormatter(new_val);
     }
 
     void Logger::log(LogLevel::Level level, const LogEvent::ptr event)
@@ -347,7 +362,6 @@ namespace sylar
             { //如果appender为空 调用root Logger的log
                 for (auto &i : m_appenders)
                 {
-                    //  std::cout <<"Jinruappenders"<<m_appenders.size()<< std::endl;
 
                     i->log(self, level, event);
                 }
@@ -416,7 +430,7 @@ namespace sylar
         if (level >= this->m_level)
 
         {
-            std::cout << (m_formatter == nullptr) << std::endl; //TODO:找到2 formatter是空的！！！
+            //TODO:找到2 formatter是空的！！！
             if (m_formatter == nullptr)
             {
                 m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T [%p]%T[%t]%T[%c]%T %f:%l%T %m  %n"));
@@ -426,11 +440,12 @@ namespace sylar
     }
 
     std::string StdoutLogAppender::toYamlString()
+
     {
         YAML::Node node;
         node["type"] = "StdoutLogAppender";
         node["level"] = LogLevel::ToString(m_level);
-        if (m_formatter)
+        if (m_hasFormatter && m_formatter)
         {
             node["formatter"] = m_formatter->getPattern();
         }
@@ -445,7 +460,7 @@ namespace sylar
         node["type"] = "FileLogAppender";
         node["file"] = m_filename;
         node["level"] = LogLevel::ToString(m_level);
-        if (m_formatter)
+        if (m_hasFormatter && m_formatter)
         {
             node["formatter"] = m_formatter->getPattern();
         }
@@ -477,6 +492,19 @@ namespace sylar
 *
 */
 
+    void LogFormatter::setFormatter(LogFormatter::ptr formatter)
+    {
+        m_formatter = formatter;
+        if (formatter)
+        {
+            m_hasFormatter = true;
+        }
+        else
+        {
+            m_hasFormatter = false;
+        }
+    }
+
     LogFormatter::LogFormatter(const std::string &pattern) : m_pattern(pattern)
     {
         init();
@@ -489,7 +517,7 @@ namespace sylar
         //str format type
         std::vector<std::tuple<std::string, std::string, int>> vec;
         std::string nstr;
-        std::cout << m_pattern << std::endl;
+
         for (size_t i = 0; i < m_pattern.size(); ++i)
         {
             if (m_pattern[i] != '%')
@@ -627,7 +655,7 @@ namespace sylar
         {
             if (std::get<2>(i) == 0)
             {
-                // std::cout <<__FILE__<<__LINE__ << m_items.size() << std::endl;
+
                 m_items.push_back(FormatItem::ptr(new StringFormatItem(std::get<0>(i))));
             }
             else
@@ -635,20 +663,17 @@ namespace sylar
                 auto it = s_format_items.find(std::get<0>(i));
                 if (it == s_format_items.end())
                 {
-                    //   std::cout <<__FILE__<<__LINE__ << m_items.size() << std::endl;
+
                     m_items.push_back(FormatItem::ptr(new StringFormatItem("<<error_format %" + std::get<0>(i) + ">>")));
                     m_error = true; //格式错误
                 }
                 else
                 {
-                    //   std::cout <<__FILE__<<__LINE__ << m_items.size() << std::endl;
+
                     m_items.push_back(it->second(std::get<1>(i)));
                 }
             }
-
-            //   std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
         }
-        // std::cout << __FILE__ << __LINE__ << m_items.size() << std::endl;
     }
 
     std::string LogFormatter::format(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event)
@@ -658,7 +683,7 @@ namespace sylar
         for (auto &i : m_items)
 
         {
-            //std::cout<<"jinru items"<<std::endl;
+
             i->format(ss, logger, level, event);
         }
         return ss.str();
@@ -749,7 +774,7 @@ namespace sylar
 
             if (n["appenders"].IsDefined())
             {
-                //std::cout << "==" << ld.name << " = " << n["appenders"].size() << std::endl;
+
                 for (size_t x = 0; x < n["appenders"].size(); ++x)
                 {
                     auto a = n["appenders"][x];
@@ -877,8 +902,7 @@ namespace sylar
                         }
                     }
                     logger->setLevel(i.level);
-                    //std::cout << "** " << i.name << " level=" << i.level
-                    //<< "  " << logger << std::endl;
+
                     if (!i.formatter.empty())
                     {
                         logger->setFormatter(i.formatter);
@@ -906,7 +930,7 @@ namespace sylar
                             LogFormatter::ptr fmt(new LogFormatter(a.formatter));
                             if (!fmt->isError())
                             {
-                                ap->setFormatter(fmt);
+                                ap->setFormatter(fmt); //没有错误再放进去
                             }
                             else
                             {
